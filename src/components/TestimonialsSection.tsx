@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import TextReveal, { LineReveal } from "./TextReveal";
 
 const testimonials = [
   {
@@ -31,37 +32,65 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
 
-  const prev = () => setCurrent((c) => (c === 0 ? testimonials.length - 1 : c - 1));
-  const next = () => setCurrent((c) => (c === testimonials.length - 1 ? 0 : c + 1));
+  const prev = () => {
+    setDirection(-1);
+    setCurrent((c) => (c === 0 ? testimonials.length - 1 : c - 1));
+  };
+  const next = () => {
+    setDirection(1);
+    setCurrent((c) => (c === testimonials.length - 1 ? 0 : c + 1));
+  };
+
+  const variants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 200 : -200,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -200 : 200,
+      opacity: 0,
+      scale: 0.95,
+    }),
+  };
 
   return (
     <section id="testimonios" className="py-24 md:py-32 relative">
       <div className="container mx-auto px-4">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="text-primary text-sm font-medium tracking-widest uppercase">
-            Testimonios
-          </span>
-          <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mt-3">
-            Lo que dicen{" "}
-            <span className="text-secondary text-glow-green">nuestros clientes</span>
-          </h2>
-        </motion.div>
+        <div className="text-center mb-16">
+          <LineReveal>
+            <span className="text-primary text-sm font-medium tracking-widest uppercase">
+              Testimonios
+            </span>
+          </LineReveal>
+          <TextReveal
+            className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mt-3"
+            delay={0.1}
+          >
+            Lo que dicen nuestros clientes
+          </TextReveal>
+        </div>
 
         <div className="max-w-2xl mx-auto relative">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="bg-card rounded-xl p-8 neon-border text-center"
             >
               <Quote className="mx-auto mb-6 text-primary/30" size={40} />
@@ -97,9 +126,12 @@ export default function TestimonialsSection() {
               {testimonials.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setCurrent(i)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i === current ? "bg-primary w-6" : "bg-muted-foreground/30"
+                  onClick={() => {
+                    setDirection(i > current ? 1 : -1);
+                    setCurrent(i);
+                  }}
+                  className={`h-2 rounded-full transition-all duration-500 ${
+                    i === current ? "bg-primary w-8" : "bg-muted-foreground/30 w-2"
                   }`}
                   aria-label={`Testimonio ${i + 1}`}
                 />
