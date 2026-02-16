@@ -1,11 +1,23 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NetworkScene from "./NetworkScene";
+import TextReveal, { LineReveal } from "./TextReveal";
+import { useRef } from "react";
 
 export default function HeroSection() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.8], [0, -100]);
+  const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* 3D Background */}
       <NetworkScene />
 
@@ -14,42 +26,36 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60 z-[1]" />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
+      <motion.div
+        className="relative z-10 container mx-auto px-4 text-center"
+        style={{ opacity, y, scale }}
+      >
+        <LineReveal delay={0.2}>
           <span className="inline-block px-4 py-1.5 mb-6 text-xs font-medium tracking-widest uppercase border rounded-full text-primary border-primary/30 bg-primary/5">
             Software & Automatización
           </span>
-        </motion.div>
+        </LineReveal>
 
-        <motion.h1
+        <TextReveal
+          as="h1"
           className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 max-w-4xl mx-auto"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          delay={0.4}
         >
-          Transformamos tu negocio con{" "}
-          <span className="text-primary text-glow-cyan">software inteligente</span>
-        </motion.h1>
+          Transformamos tu negocio con software inteligente
+        </TextReveal>
 
-        <motion.p
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 font-body"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-        >
-          Diseñamos soluciones de software a medida y automatizaciones que impulsan la eficiencia
-          operativa de tu empresa. Tu socio estratégico en transformación digital.
-        </motion.p>
+        <LineReveal delay={0.8}>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 font-body">
+            Diseñamos soluciones de software a medida y automatizaciones que impulsan la eficiencia
+            operativa de tu empresa. Tu socio estratégico en transformación digital.
+          </p>
+        </LineReveal>
 
         <motion.div
           className="flex flex-col sm:flex-row gap-4 justify-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
+          transition={{ duration: 0.9, delay: 1, ease: [0.16, 1, 0.3, 1] }}
         >
           <Button
             asChild
@@ -69,7 +75,7 @@ export default function HeroSection() {
             <a href="#servicios">Ver servicios</a>
           </Button>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
